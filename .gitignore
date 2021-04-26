@@ -1,0 +1,5 @@
+#gitignore
+
+#Se omite dependecias nodejs
+\api-zoo\node_modules
+\api-zoo\package-lock.json
