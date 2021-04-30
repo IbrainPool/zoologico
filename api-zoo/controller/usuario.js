@@ -4,6 +4,7 @@
 var bcrypt = require('bcrypt-nodejs');
 var fs = require('fs');
 var path = require('path');
+const { exists } = require('../model/usuario');
 
 //modelos
 var UsuarioModel =  require('../model/usuario');
@@ -74,7 +75,104 @@ function save(req, res) {
     }
 }
 
+function upload(req, res) {
+
+    var usuarioID = req.params.id;
+
+    if(req.files) {
+        console.log(req.files);
+
+        var file_path = req.files.files.path;
+        var file_split = file_path.split('\\');
+        var file_name = file_split[2];
+        console.log(file_name);
+        var  ext_split = file_name.split('\.');
+        var file_ext = ext_split[1];
+        console.log(file_ext);
+
+        if(file_ext === 'png' || file_ext === 'jpg' || file_ext === 'jpeg') {
+
+            if( req.user && usuarioID !==  req.user.sub) {
+                return res.status(403).send({
+                    message: 'No tienes permiso para actualizar el registro.'
+                });
+            }
+
+            UsuarioModel.findByIdAndUpdate(usuarioID, 
+                {images: file_name }, 
+                { new: false}, 
+                (err, usuarioActualizado ) => {
+                    if(err) {
+                        res.status(500).send({message: ' Error del sistema'});
+                    } else {
+                        if(!usuarioActualizado) {
+                            res.status(404).send({message: 'Usuario no encontrado'});
+
+                        } else {
+                            
+                            deleteImage(usuarioActualizado.images);
+                            res.status(200).send({
+                                message: 'Registro Actualizado',
+                                'usuario': usuarioActualizado,
+                                'image': file_name
+                            });
+                        }
+                    }
+                });
+
+
+        } else {
+            //extensiones no validas
+            fs.unlink(file_path, (err) => {
+                if(err) {
+                    res.status(500).send({
+                        message : 'Extension no valida y fichero no eliminado.'
+                    });
+                } else {
+                    res.status(200).send({
+                        message: 'Extension no es valida.'
+                    });
+                }
+            });
+        }
+        
+    } else {
+        res.status(200).send({
+            message: 'No existe ficheros.'
+        });
+    }
+
+}
+
+function deleteImage(filename) {
+    var path_imagen = './upload/usuarios/'+filename;
+    fs.unlink(path_imagen, (err) => {
+        if(err) {
+            console.error('Error', err);
+        } else {
+           console.log('Fichero Elimnado ', filename);
+        }
+    });
+}
+
+function getImagen(req, res) {
+
+    var imagefile = req.params.id;
+    var path_imagen = './upload/usuarios/'+imagefile;
+    console.log(path_imagen);
+    fs.exists(path_imagen, function(imagen) {
+        if(imagen) {
+            res.sendFile(path.resolve(path_imagen));
+        } else {
+            res.status(404).send({
+                message: 'imagen no encontrada.'
+            });
+        }
+    });
+}
 
 module.exports = {
-    save
+    save, 
+    upload,
+    getImagen
 }
