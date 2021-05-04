@@ -96,14 +96,14 @@ function upload(req, res) {
                 });
             }
 
-            animalesModel.findByIdAndUpdate(animalesID, 
+            AnimalesModel.findByIdAndUpdate(animalesID, 
                 {images: file_name }, 
                 { new: false}, 
                 (err, animalesActualizado ) => {
                     if(err) {
                         res.status(500).send({message: ' Error del sistema'});
                     } else {
-                        if(!animlaesActualizado) {
+                        if(!animalesActualizado) {
                             res.status(404).send({message: 'Animal no encontrado'});
 
                         } else {
