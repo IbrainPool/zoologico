@@ -38,7 +38,7 @@ function save(req, res) {
                         if(err) {
                             res.status(500).send({message:'Error del sistema'});
                         } else {
-                            animales.especie =  hash;
+
                             animales.save((err, animalesSave) => {
                                 if(err) {
                                     res.status(500).send({message:'Error del sistema'});
