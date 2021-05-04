@@ -5,6 +5,7 @@ var app = express();
 
 var bodyParse = require('body-parser');
 var usuarioRouter =  require('./router/usuario');
+var animalesRouter = require('./router/animales');
 
 app.use(bodyParse.urlencoded({ extended: false}));
 app.use(bodyParse.json())
@@ -18,5 +19,5 @@ app.use((req, resp, next) => {
 });
 
 app.use('/api/usuario', usuarioRouter);
-
+app.use('/api/animales', animalesRouter);
 module.exports = app;
